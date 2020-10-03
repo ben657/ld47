@@ -4,28 +4,38 @@ using UnityEngine;
 
 public class Roundabout : MonoBehaviour
 {
+    public LineRenderer laneMarkingPrefab;
     public float maxRadius = 1.0f;
     public int lanes = 2;
     public float centerRadius = 1.0f;
+    public float radiusSegmentRatio = 14.4f;
 
     float laneWidth = 0.0f;
 
     void Awake()
     {
-        laneWidth = (maxRadius - centerRadius) / (float)lanes;
+        laneWidth = (maxRadius - centerRadius) / lanes;
     }
 
-    public float GetLaneRadius(int lane)
+    private void Start()
     {
-        return centerRadius + laneWidth * lane + laneWidth * 0.5f;
+        for(int i = 0; i < lanes + 1; i++)
+        {
+            CreateLaneLines(i + 1);
+        }
     }
 
-    public float GetLaneCirc(int lane)
+    public float GetLaneRadius(float lane)
+    {
+        return centerRadius + laneWidth * lane - laneWidth * 0.5f;
+    }
+
+    public float GetLaneCirc(float lane)
     {
         return 2 * Mathf.PI * GetLaneRadius(lane);
     }
 
-    public float MoveAngleAroundLane(int lane, float current, float distance)
+    public float MoveAngleAroundLane(float lane, float current, float distance)
     {
         float circ = GetLaneCirc(lane);
         float circAmount = distance / circ;
@@ -34,12 +44,26 @@ public class Roundabout : MonoBehaviour
         return current + angleDelta;
     }
 
-    public Vector3 GetPointOnLane(int lane, float angle)
+    public Vector3 GetPointOnLane(float lane, float angle)
     {
         Vector3 dir = Vector3.forward;
         dir = Quaternion.AngleAxis(angle, Vector3.up) * dir;
 
         return transform.position + dir * GetLaneRadius(lane);
+    }
+
+    void CreateLaneLines(int lane)
+    {
+        var lineRenderer = Instantiate(laneMarkingPrefab);
+        var segmentCount = (int)(radiusSegmentRatio * GetLaneRadius(lane));
+        var segmentAngle = 360.0f / segmentCount;
+        lineRenderer.positionCount = segmentCount;
+        Vector3[] positions = new Vector3[segmentCount];
+        for(int i = 0; i  < segmentCount; i++)
+        {
+            positions[i] = GetPointOnLane(lane - 0.5f, segmentAngle * i) + Vector3.up * 0.05f;
+        }
+        lineRenderer.SetPositions(positions);
     }
 
     // Update is called once per frame
@@ -52,9 +76,10 @@ public class Roundabout : MonoBehaviour
     {
 #if UNITY_EDITOR
         UnityEditor.Handles.color = Color.green;
-        for(int i = 0; i < lanes; i++)
+        float laneWidth = (maxRadius - centerRadius) / lanes;
+        for (int i = 0; i < lanes; i++)
         {
-            UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, centerRadius + (((maxRadius - centerRadius) / lanes) * (i + 1)) + (laneWidth * 0.5f));
+            UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, centerRadius + laneWidth * (i + 1) - (laneWidth * 0.5f));
         }
 
         UnityEditor.Handles.color = Color.cyan;
