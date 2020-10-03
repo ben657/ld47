@@ -21,7 +21,7 @@ public class Roundabout : MonoBehaviour
         maxRadius = centerRadius + laneWidth * lanes;
     }
 
-    private void Start()
+    public void Setup()
     {
         for(int i = 0; i < lanes; i++)
         {

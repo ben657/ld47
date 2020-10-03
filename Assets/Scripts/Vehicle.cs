@@ -1,15 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Vehicle : MonoBehaviour
 {
-    public MeshRenderer bodyMesh;
     public float speed = 0.0f;
-    float laneChangeTime = 1.0f;
+    public string meshName = null;
+    public float laneChangeTime = 1.0f;
 
     Rigidbody body;
+    MeshRenderer bodyMesh;
 
     Roundabout roundabout;
     public Roundabout Roundabout => roundabout;
@@ -31,6 +33,11 @@ public class Vehicle : MonoBehaviour
     void Start()
     {
         lastPosition = transform.position;
+
+        GameObject meshPrefab = meshName == null || meshName.Length == 0 ? VehicleModelManager.GetRandomVehicleModel() : VehicleModelManager.GetVehicleModel(meshName);
+        var meshObject = Instantiate(meshPrefab);
+        meshObject.transform.SetParent(transform, false);
+        bodyMesh = meshObject.GetComponent<MeshRenderer>();
         bodyMesh.material.color = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 1.0f);
     }
 
