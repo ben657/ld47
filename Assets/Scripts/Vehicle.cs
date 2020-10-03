@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.AddressableAssets;
+
+public class VehicleCollisionEvent : UnityEvent<Vehicle> { }
 
 [RequireComponent(typeof(Rigidbody))]
 public class Vehicle : MonoBehaviour
@@ -9,6 +12,8 @@ public class Vehicle : MonoBehaviour
     public float speed = 0.0f;
     public string meshName = null;
     public float laneChangeTime = 1.0f;
+
+    public VehicleCollisionEvent OnCollide; 
 
     Rigidbody body;
     MeshRenderer bodyMesh;
@@ -114,6 +119,18 @@ public class Vehicle : MonoBehaviour
         transform.forward = GetVelocity();
 
         lastPosition = transform.position;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.collider.attachedRigidbody)
+        {
+            var vehicle = collision.collider.attachedRigidbody.GetComponent<Vehicle>();
+            if (vehicle)
+                OnCollide.Invoke(vehicle);
+
+            Debug.Log("Collided");
+        }
     }
 
     private void OnDrawGizmos()
