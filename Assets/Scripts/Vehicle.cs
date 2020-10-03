@@ -36,6 +36,7 @@ public class Vehicle : MonoBehaviour
     public float CurrentAngle => currentAngle;
 
     float currentSpeed = 0.0f;
+    public float CurrentSpeed => currentSpeed;
     public float targetSpeed = 0.0f;
 
     Vector3 lastPosition;
@@ -120,16 +121,6 @@ public class Vehicle : MonoBehaviour
     {
         if (roundabout)
         {
-            targetSpeed = maxSpeed;
-
-            // Slow to match car in front
-            Vehicle nextVehicle = roundabout.GetVehicleAhead(this);
-            float distance = roundabout.GetAngleDistance(GetLane(), currentAngle, nextVehicle.CurrentAngle);
-            if (distance < followDistance)
-            {
-                targetSpeed = nextVehicle.currentSpeed;
-            }
-
             throttle = currentSpeed == targetSpeed ? 0.0f : currentSpeed < targetSpeed ? 1.0f : -1.0f;
             float changeRate = throttle < 0.0f && currentSpeed > 0.0f ? braking : acceleration;
 

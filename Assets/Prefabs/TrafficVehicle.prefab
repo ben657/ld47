@@ -1,39 +1,28 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &521985839107616640
+--- !u!114 &6833803513934326366
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7464007708621818932}
+  m_GameObject: {fileID: 9162649004890450673}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3749c36296f069478d491036023a4a2, type: 3}
+  m_Script: {fileID: 11500000, guid: d046e0b7aa106464d91103d642d5ac57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &4275036903798489696
+  followDistance: 9
+--- !u!1001 &2589223060001449125
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
-      propertyPath: maxSpeed
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
-      propertyPath: acceleration
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
-      propertyPath: meshName
-      value: Sports Variant
-      objectReference: {fileID: 0}
     - target: {fileID: 6685171567472021076, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: m_Name
-      value: PlayerVehicle
+      value: TrafficVehicle
       objectReference: {fileID: 0}
     - target: {fileID: 6685171567472021077, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: m_LocalPosition.x
@@ -81,8 +70,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
---- !u!1 &7464007708621818932 stripped
+--- !u!1 &9162649004890450673 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6685171567472021076, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
-  m_PrefabInstance: {fileID: 4275036903798489696}
+  m_PrefabInstance: {fileID: 2589223060001449125}
   m_PrefabAsset: {fileID: 0}

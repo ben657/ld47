@@ -45,7 +45,6 @@ public class Roundabout : MonoBehaviour
             {
                 var vehicle = Instantiate(trafficVehiclePrefab);
                 vehicle.SetupForRoundabout(this);
-                vehicle.gameObject.AddComponent<TrafficVehicleController>();
                 vehicle.SetAngle(j * anglePerVehicle);
                 vehicle.SetLane(lane);
                 vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
