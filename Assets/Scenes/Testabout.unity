@@ -251,12 +251,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   innerLaneMarkingPrefab: {fileID: 2911948984480483425, guid: e73a96bdc52bf3540b703a73958fdf7e, type: 3}
   outerLaneMarkingPrefab: {fileID: 6587212261984727199, guid: 136ac9ff6ef94a44794ca6c351116d96, type: 3}
-  trafficVehiclePrefab: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
+  trafficVehiclePrefab: {fileID: 9162649004890450679, guid: 884a45f7925ae6646b91a77d3c26cee8, type: 3}
   laneWidth: 7
   lanes: 5
   centerRadius: 5
   radiusSegmentRatio: 14.4
-  radiusTrafficRatio: 0.3
+  radiusTrafficRatio: 0.4
   initialTraffic: 10
 --- !u!1 &979710502
 GameObject:
