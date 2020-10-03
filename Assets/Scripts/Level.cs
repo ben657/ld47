@@ -23,7 +23,7 @@ public class Level : MonoBehaviour
 
         Camera.main.GetComponent<CameraController>().target = playerVehicle;
 
-        roundabout.Setup();
+        roundabout.Setup(playerVehicle);
     }
 
     // Update is called once per frame

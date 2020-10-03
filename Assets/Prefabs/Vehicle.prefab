@@ -93,6 +93,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 0
   acceleration: 5
+  braking: 30
   throttle: 0
   meshName: 
   laneChangeTime: 1
+  followDistance: 6
+  targetSpeed: 0

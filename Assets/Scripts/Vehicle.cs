@@ -4,18 +4,22 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.AddressableAssets;
 
-public class VehicleCollisionEvent : UnityEvent<Vehicle> { }
+public class VehicleEvent : UnityEvent<Vehicle> { }
+public class LaneChangeEvent : UnityEvent<Vehicle, int, int> { }
 
 [RequireComponent(typeof(Rigidbody))]
 public class Vehicle : MonoBehaviour
 {
     public float maxSpeed = 0.0f;
     public float acceleration = 0.0f;
+    public float braking = 0.0f;
     public float throttle = 0.0f;
     public string meshName = null;
     public float laneChangeTime = 1.0f;
+    public float followDistance = 1.0f;
 
-    public VehicleCollisionEvent OnCollide; 
+    public VehicleEvent OnCollide = new VehicleEvent();
+    public LaneChangeEvent OnLaneChanged = new LaneChangeEvent();
 
     Rigidbody body;
     MeshRenderer bodyMesh;
@@ -29,8 +33,10 @@ public class Vehicle : MonoBehaviour
     public bool IsChangingLane => currentLane != targetLane && laneChangeProgress < 1.0f;
 
     float currentAngle = 0.0f;
+    public float CurrentAngle => currentAngle;
 
     float currentSpeed = 0.0f;
+    public float targetSpeed = 0.0f;
 
     Vector3 lastPosition;
 
@@ -49,8 +55,7 @@ public class Vehicle : MonoBehaviour
         bodyMesh = meshObject.GetComponent<MeshRenderer>();
         bodyMesh.material.color = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 1.0f);
 
-        //currentSpeed = maxSpeed;
-        throttle = 1.0f;
+        targetSpeed = maxSpeed;
     }
 
     public void SetupForRoundabout(Roundabout roundabout)
@@ -99,6 +104,12 @@ public class Vehicle : MonoBehaviour
         targetLane = lane;
     }
 
+    public int GetLane()
+    {
+        if (!IsChangingLane) return currentLane;
+        else return laneChangeProgress > 0.5f ? targetLane : currentLane;
+    }
+
     public void SetAngle(float angle)
     {
         currentAngle = angle;
@@ -109,13 +120,29 @@ public class Vehicle : MonoBehaviour
     {
         if (roundabout)
         {
-            currentSpeed = Mathf.Clamp(currentSpeed + throttle * acceleration * Time.deltaTime, -maxSpeed * 0.5f, maxSpeed);
+            targetSpeed = maxSpeed;
+
+            // Slow to match car in front
+            Vehicle nextVehicle = roundabout.GetVehicleAhead(this);
+            float distance = roundabout.GetAngleDistance(GetLane(), currentAngle, nextVehicle.CurrentAngle);
+            if (distance < followDistance)
+            {
+                targetSpeed = nextVehicle.currentSpeed;
+            }
+
+            throttle = currentSpeed == targetSpeed ? 0.0f : currentSpeed < targetSpeed ? 1.0f : -1.0f;
+            float changeRate = throttle < 0.0f && currentSpeed > 0.0f ? braking : acceleration;
+
+            currentSpeed = Mathf.Clamp(currentSpeed + throttle * changeRate * Time.deltaTime, -maxSpeed * 0.5f, maxSpeed);
 
             currentAngle = roundabout.MoveAngleAroundLane(currentLane, currentAngle, currentSpeed * Time.deltaTime);
             transform.position = roundabout.GetPointOnLane(currentLane, currentAngle);
 
+            // Lane changing lerp
             if (IsChangingLane)
             {
+                if (laneChangeProgress <= 0.5f && laneChangeProgress + laneChangeTime * Time.deltaTime > 0.5f)
+                    OnLaneChanged.Invoke(this, currentLane, targetLane);
                 laneChangeProgress += laneChangeTime * Time.deltaTime;
                 float laneLerpAmount = Mathf.SmoothStep(0.0f, 1.0f, laneChangeProgress);
                 transform.position = Vector3.Lerp(transform.position, roundabout.GetPointOnLane(targetLane, currentAngle), laneLerpAmount);
