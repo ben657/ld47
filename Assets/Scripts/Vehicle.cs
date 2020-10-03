@@ -9,7 +9,9 @@ public class VehicleCollisionEvent : UnityEvent<Vehicle> { }
 [RequireComponent(typeof(Rigidbody))]
 public class Vehicle : MonoBehaviour
 {
-    public float speed = 0.0f;
+    public float maxSpeed = 0.0f;
+    public float acceleration = 0.0f;
+    public float throttle = 0.0f;
     public string meshName = null;
     public float laneChangeTime = 1.0f;
 
@@ -28,6 +30,8 @@ public class Vehicle : MonoBehaviour
 
     float currentAngle = 0.0f;
 
+    float currentSpeed = 0.0f;
+
     Vector3 lastPosition;
 
     private void Awake()
@@ -44,6 +48,9 @@ public class Vehicle : MonoBehaviour
         meshObject.transform.SetParent(transform, false);
         bodyMesh = meshObject.GetComponent<MeshRenderer>();
         bodyMesh.material.color = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 1.0f);
+
+        //currentSpeed = maxSpeed;
+        throttle = 1.0f;
     }
 
     public void SetupForRoundabout(Roundabout roundabout)
@@ -102,7 +109,9 @@ public class Vehicle : MonoBehaviour
     {
         if (roundabout)
         {
-            currentAngle = roundabout.MoveAngleAroundLane(currentLane, currentAngle, speed * Time.deltaTime);
+            currentSpeed = Mathf.Clamp(currentSpeed + throttle * acceleration * Time.deltaTime, -maxSpeed * 0.5f, maxSpeed);
+
+            currentAngle = roundabout.MoveAngleAroundLane(currentLane, currentAngle, currentSpeed * Time.deltaTime);
             transform.position = roundabout.GetPointOnLane(currentLane, currentAngle);
 
             if (IsChangingLane)

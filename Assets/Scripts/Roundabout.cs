@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Roundabout : MonoBehaviour
 {
-    public LineRenderer laneMarkingPrefab;
+    public LineRenderer innerLaneMarkingPrefab;
+    public LineRenderer outerLaneMarkingPrefab;
     public Vehicle trafficVehiclePrefab;
 
     public float laneWidth = 10.0f;
@@ -26,7 +27,7 @@ public class Roundabout : MonoBehaviour
         for(int i = 0; i < lanes; i++)
         {
             int lane = i + 1;
-            CreateLaneLines(lane);
+            CreateLaneLines(lane, i != 0);
             float radius = GetLaneRadius(lane);
             int trafficCount = Mathf.Clamp((int)(radius * radiusTrafficRatio), 1, 50);
             float anglePerVehicle = 360.0f / trafficCount;
@@ -37,10 +38,11 @@ public class Roundabout : MonoBehaviour
                 vehicle.gameObject.AddComponent<TrafficVehicleController>();
                 vehicle.SetAngle(j * anglePerVehicle);
                 vehicle.SetLane(lane);
+                vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
             }
         }
 
-        CreateLaneLines(lanes + 1);
+        CreateLaneLines(lanes + 1, false);
     }
 
     public float GetLaneRadius(float lane)
@@ -70,9 +72,9 @@ public class Roundabout : MonoBehaviour
         return transform.position + dir * GetLaneRadius(lane);
     }
 
-    void CreateLaneLines(int lane)
+    void CreateLaneLines(int lane, bool isInner)
     {
-        var lineRenderer = Instantiate(laneMarkingPrefab);
+        var lineRenderer = Instantiate(isInner ? innerLaneMarkingPrefab : outerLaneMarkingPrefab);
         var segmentCount = (int)(radiusSegmentRatio * GetLaneRadius(lane));
         var segmentAngle = 360.0f / segmentCount;
         lineRenderer.positionCount = segmentCount;

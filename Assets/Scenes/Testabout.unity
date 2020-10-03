@@ -249,10 +249,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4e7ea7f8dc99e84d8309ef0d8bbd63a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  laneMarkingPrefab: {fileID: 2911948984480483425, guid: e73a96bdc52bf3540b703a73958fdf7e, type: 3}
+  innerLaneMarkingPrefab: {fileID: 2911948984480483425, guid: e73a96bdc52bf3540b703a73958fdf7e, type: 3}
+  outerLaneMarkingPrefab: {fileID: 6587212261984727199, guid: 136ac9ff6ef94a44794ca6c351116d96, type: 3}
   trafficVehiclePrefab: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
   laneWidth: 7
-  lanes: 4
+  lanes: 5
   centerRadius: 5
   radiusSegmentRatio: 14.4
   radiusTrafficRatio: 0.3
@@ -360,7 +361,7 @@ Transform:
   m_GameObject: {fileID: 1553224371}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.05, z: 0}
-  m_LocalScale: {x: 90, y: 0, z: 90}
+  m_LocalScale: {x: 85.600006, y: 0, z: 85.600006}
   m_Children: []
   m_Father: {fileID: 589574183}
   m_RootOrder: 1

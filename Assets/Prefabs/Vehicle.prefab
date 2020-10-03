@@ -91,5 +91,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af91456268dfe24bb1fe5914a8452a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bodyMesh: {fileID: 0}
-  speed: 10
+  maxSpeed: 0
+  acceleration: 5
+  throttle: 0
+  meshName: 
+  laneChangeTime: 1
