@@ -5,24 +5,42 @@ using UnityEngine;
 public class Roundabout : MonoBehaviour
 {
     public LineRenderer laneMarkingPrefab;
-    public float maxRadius = 1.0f;
+    public Vehicle trafficVehiclePrefab;
+
+    public float laneWidth = 10.0f;
     public int lanes = 2;
     public float centerRadius = 1.0f;
     public float radiusSegmentRatio = 14.4f;
+    public float radiusTrafficRatio = 0.4f;
+    public int initialTraffic = 0;
 
-    float laneWidth = 0.0f;
+    float maxRadius = 0.0f;
 
     void Awake()
     {
-        laneWidth = (maxRadius - centerRadius) / lanes;
+        maxRadius = centerRadius + laneWidth * lanes;
     }
 
     private void Start()
     {
-        for(int i = 0; i < lanes + 1; i++)
+        for(int i = 0; i < lanes; i++)
         {
-            CreateLaneLines(i + 1);
+            int lane = i + 1;
+            CreateLaneLines(lane);
+            float radius = GetLaneRadius(lane);
+            int trafficCount = Mathf.Clamp((int)(radius * radiusTrafficRatio), 1, 50);
+            float anglePerVehicle = 360.0f / trafficCount;
+            for(int j = (i == lanes - 1 ? 1 : 0); j < trafficCount; j++)
+            {
+                var vehicle = Instantiate(trafficVehiclePrefab);
+                vehicle.SetupForRoundabout(this);
+                vehicle.gameObject.AddComponent<TrafficVehicleController>();
+                vehicle.SetAngle(j * anglePerVehicle);
+                vehicle.SetLane(lane);
+            }
         }
+
+        CreateLaneLines(lanes + 1);
     }
 
     public float GetLaneRadius(float lane)
@@ -41,7 +59,7 @@ public class Roundabout : MonoBehaviour
         float circAmount = distance / circ;
         float angleDelta = circAmount * 360.0f;
 
-        return current + angleDelta;
+        return (current + angleDelta) % 360;
     }
 
     public Vector3 GetPointOnLane(float lane, float angle)
@@ -76,7 +94,6 @@ public class Roundabout : MonoBehaviour
     {
 #if UNITY_EDITOR
         UnityEditor.Handles.color = Color.green;
-        float laneWidth = (maxRadius - centerRadius) / lanes;
         for (int i = 0; i < lanes; i++)
         {
             UnityEditor.Handles.DrawWireDisc(transform.position, Vector3.up, centerRadius + laneWidth * (i + 1) - (laneWidth * 0.5f));
