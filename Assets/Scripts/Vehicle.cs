@@ -6,28 +6,35 @@ using UnityEngine;
 public class Vehicle : MonoBehaviour
 {
     public float speed = 0.0f;
+    float laneChangeTime = 1.0f;
 
     Rigidbody body;
 
     Roundabout roundabout;
+
     int currentLane = 0;
+    int targetLane = 0;
+    float laneChangeProgress = 0.0f;
+
     float currentAngle = 0.0f;
+
+    Vector3 lastPosition;
 
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
     }
-
-    // Start is called before the first frame update
+    
     void Start()
     {
-        
+        lastPosition = transform.position;
     }
 
     public void SetupForRoundabout(Roundabout roundabout)
     {
         this.roundabout = roundabout;
         currentLane = this.roundabout.lanes;
+        targetLane = currentLane;
     }
 
     public Vector3 GetTangentToRoundabout()
@@ -35,11 +42,61 @@ public class Vehicle : MonoBehaviour
         return -Vector3.Cross((transform.position - roundabout.transform.position).normalized, Vector3.up);
     }
 
+    public Vector3 GetVelocity()
+    {
+        return (transform.position - lastPosition) / Time.deltaTime;
+    }
+
+    public void ChangeLaneLeft()
+    {
+        targetLane = Mathf.Clamp(currentLane + 1, 1, roundabout.lanes);
+        StartLaneChange();
+    }
+
+    public void ChangeLaneRight()
+    {
+        targetLane = Mathf.Clamp(currentLane - 1, 1, roundabout.lanes);
+        StartLaneChange();
+    }
+
+    void StartLaneChange()
+    {
+        if (targetLane == currentLane) return;
+
+        laneChangeProgress = 0.0f;
+    }
+
     // Update is called once per frame
     void Update()
     {
         currentAngle = roundabout.MoveAngleAroundLane(currentLane, currentAngle, speed * Time.deltaTime);
         transform.position = roundabout.GetPointOnLane(currentLane, currentAngle);
-        transform.forward = GetTangentToRoundabout();
+
+        if(currentLane != targetLane)
+        {
+            laneChangeProgress += laneChangeTime * Time.deltaTime;
+            float laneLerpAmount = Mathf.SmoothStep(0.0f, 1.0f, laneChangeProgress);
+            transform.position = Vector3.Lerp(transform.position, roundabout.GetPointOnLane(targetLane, currentAngle), laneLerpAmount);
+
+            if (laneChangeProgress >= 1.0f)
+                currentLane = targetLane;
+        }
+
+        transform.forward = GetVelocity();
+
+        lastPosition = transform.position;
+    }
+
+    private void OnDrawGizmos()
+    {
+#if UNITY_EDITOR
+        if (!UnityEditor.Selection.activeTransform) return;
+        var v = UnityEditor.Selection.activeTransform.GetComponentInParent<Vehicle>();
+        if (v && v == this)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, 0.25f);
+        }
+#endif
     }
 }
