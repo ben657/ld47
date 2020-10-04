@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.AddressableAssets;
 
 public class VehicleEvent : UnityEvent<Vehicle> { }
+public class LaneUserEvent : UnityEvent<ILaneUser> { }
 public class LaneChangeEvent : UnityEvent<Vehicle, int, int> { }
 
 [RequireComponent(typeof(Rigidbody))]
@@ -20,7 +21,7 @@ public class Vehicle : MonoBehaviour, ILaneUser
     public float laneChangeTime = 1.0f;
     public float laneChangeThreshold = 0.2f;
 
-    public VehicleEvent OnCollide = new VehicleEvent();
+    public LaneUserEvent OnCollide = new LaneUserEvent();
     public VehicleEvent OnDestroyed = new VehicleEvent();
     public LaneChangeEvent OnLaneChanged = new LaneChangeEvent();
 
@@ -184,13 +185,11 @@ public class Vehicle : MonoBehaviour, ILaneUser
     private void OnTriggerEnter(Collider other)
     {
         var vehicle = other.GetComponentInParent<Vehicle>();
-        if (vehicle)
+        var obstacle = other.GetComponentInParent<Obstacle>();
+        if (vehicle || obstacle)
         {
             Debug.Log("Collided");
-            OnCollide.Invoke(vehicle);
-
-            if(GetComponent<KeyboardVehicleController>() || vehicle.GetComponent<KeyboardVehicleController>())
-                StartDestroy();
+            OnCollide.Invoke(vehicle ? (ILaneUser)vehicle : (ILaneUser)obstacle);
         }
     }
 

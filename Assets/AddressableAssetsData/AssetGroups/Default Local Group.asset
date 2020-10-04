@@ -22,15 +22,22 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - ObstaclePrefabs
-    m_MainAsset: {fileID: 5110414189906692851, guid: 1141adb1297f6eb44aa703d37bbbdc03, type: 3}
-    m_TargetAsset: {fileID: 5110414189906692851, guid: 1141adb1297f6eb44aa703d37bbbdc03, type: 3}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   - m_GUID: 18777fefe82e8ba43a592328e777bec9
     m_Address: Assets/Prefabs/Obstacles/Roadworks.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - ObstaclePrefabs
-    m_MainAsset: {fileID: 8525100883616807058, guid: 18777fefe82e8ba43a592328e777bec9, type: 3}
-    m_TargetAsset: {fileID: 8525100883616807058, guid: 18777fefe82e8ba43a592328e777bec9, type: 3}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 1f9d66ed0bf013d419f28987933bd072
+    m_Address: Assets/Prefabs/Pickups
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PickupPrefabs
+    m_MainAsset: {fileID: 102900000, guid: 1f9d66ed0bf013d419f28987933bd072, type: 3}
+    m_TargetAsset: {fileID: 102900000, guid: 1f9d66ed0bf013d419f28987933bd072, type: 3}
   - m_GUID: 5c4d01590dd454146a6101fe1b8ea038
     m_Address: Assets/Prefabs/VehicleModels
     m_ReadOnly: 0
@@ -43,8 +50,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - ObstaclePrefabs
-    m_MainAsset: {fileID: 3143259853292336726, guid: 7da6292feb66e7a42a5d017cec1c8a32, type: 3}
-    m_TargetAsset: {fileID: 3143259853292336726, guid: 7da6292feb66e7a42a5d017cec1c8a32, type: 3}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 36fc4d43c866da647a3be7a6dccc098d, type: 2}
   m_SchemaSet:

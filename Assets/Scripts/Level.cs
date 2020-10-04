@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Level : MonoBehaviour
 {
@@ -24,12 +25,18 @@ public class Level : MonoBehaviour
     {
         VehicleModelManager.Init();
         ObstaclePrefabManager.Init();
-        yield return new WaitUntil(() => VehicleModelManager.loaded && ObstaclePrefabManager.loaded);
+        PickupManager.Init();
+        yield return new WaitUntil(() => 
+            VehicleModelManager.loaded && 
+            ObstaclePrefabManager.loaded &&
+            PickupManager.loaded
+        );
 
         var playerVehicle = Instantiate(playerVehiclePrefab);
         playerVehicle.SetupForRoundabout(roundabout);
-        playerVehicle.SetAngle(90);
+        playerVehicle.SetAngle(0);
         playerVehicle.OnCollide.AddListener(v => playerDead = true);
+        playerVehicle.OnDestroyed.AddListener(v => SceneManager.LoadScene(0));
 
         Camera.main.GetComponent<CameraController>().target = playerVehicle;
 
@@ -38,17 +45,27 @@ public class Level : MonoBehaviour
         setupComplete = true;
     }
 
+    void UpdateScore()
+    {
+        int floored = Mathf.FloorToInt(score);
+        if (floored > lastFlooredScore)
+            ui.UpdateScore(Mathf.FloorToInt(score));
+
+        lastFlooredScore = floored;
+    }
+
+    public void AddBonus(int amount)
+    {
+        score += amount;
+        UpdateScore();
+    }
+
     // Update is called once per frame
     void Update()
     {
         if (!setupComplete || playerDead) return;
 
         score += Time.deltaTime * timeScoreMultiplier;
-
-        int floored = Mathf.FloorToInt(score);
-        if(floored > lastFlooredScore)
-            ui.UpdateScore(Mathf.FloorToInt(score));
-
-        lastFlooredScore = floored;
+        UpdateScore();
     }
 }

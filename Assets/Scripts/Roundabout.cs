@@ -13,19 +13,27 @@ public class Roundabout : MonoBehaviour
     public float centerRadius = 1.0f;
     public float radiusSegmentRatio = 14.4f;
     public float radiusTrafficRatio = 0.4f;
-    public float initialObstacles = 1;
+    public float skipVehicleChance = 0.0f;
+    public float minPickupTimer = 0.0f;
+    public float maxPickupTimer = 0.0f;
+    public int maxPickupsPerLane = 5;
 
     float maxRadius = 0.0f;
+    float untilPickup = 0.0f;
+    bool ready = false;
 
     List<ILaneUser>[] laneObjects;
+    List<Pickup>[] pickupsByLane;
 
     void Awake()
     {
         maxRadius = centerRadius + laneWidth * lanes;
         laneObjects = new List<ILaneUser>[lanes];
+        pickupsByLane = new List<Pickup>[lanes];
         for(int i = 0; i < lanes; i++)
         {
             laneObjects[i] = new List<ILaneUser>();
+            pickupsByLane[i] = new List<Pickup>();
         }
     }
 
@@ -35,7 +43,6 @@ public class Roundabout : MonoBehaviour
         playerVehicle.OnLaneChanged.AddListener(HandleLaneChange);
         playerVehicle.OnDestroyed.AddListener(HandleDestroyed);
 
-        int obstaclesSpawned = 0;
         int vehicleCount = 0;
         for(int i = 0; i < lanes; i++)
         {
@@ -46,29 +53,17 @@ public class Roundabout : MonoBehaviour
             float anglePerVehicle = 360.0f / trafficCount;
             for(int j = (i == lanes - 1 ? 1 : 0); j < trafficCount; j++)
             {
-                if(obstaclesSpawned < initialObstacles)
-                {
-                    var obstaclePrefab = ObstaclePrefabManager.GetRandomObstacle();
-                    GameObject obstacleObject = Instantiate(obstaclePrefab);
-                    var obstacle = obstacleObject.GetComponent<Obstacle>();
-                    obstacle.roundabout = this;
-                    obstacle.CurrentLane = lane;
-                    obstacle.CurrentAngle = j * anglePerVehicle;
-                    obstacle.transform.position = GetPointOnLane(lane, obstacle.CurrentAngle);
-                    laneObjects[i].Add(obstacle);
-                    obstaclesSpawned += 1;
-                } else
-                {
-                    var vehicle = Instantiate(trafficVehiclePrefab);
-                    vehicle.id = ++vehicleCount;
-                    vehicle.SetupForRoundabout(this);
-                    vehicle.SetAngle(j * anglePerVehicle);
-                    vehicle.SetLane(lane);
-                    vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
-                    laneObjects[i].Add(vehicle);
-                    vehicle.OnLaneChanged.AddListener(HandleLaneChange);
-                    vehicle.OnDestroyed.AddListener(HandleDestroyed);
-                }
+                if (Random.value < skipVehicleChance) continue;
+
+                var vehicle = Instantiate(trafficVehiclePrefab);
+                vehicle.id = ++vehicleCount;
+                vehicle.SetupForRoundabout(this);
+                vehicle.SetAngle(j * anglePerVehicle);
+                vehicle.SetLane(lane);
+                vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
+                laneObjects[i].Add(vehicle);
+                vehicle.OnLaneChanged.AddListener(HandleLaneChange);
+                vehicle.OnDestroyed.AddListener(HandleDestroyed);
             }
         }
 
@@ -78,6 +73,44 @@ public class Roundabout : MonoBehaviour
         {
             SortLane(i + 1);
         }
+
+        ready = true;
+    }
+
+    void SpawnObstacle()
+    {
+        //var obstaclePrefab = ObstaclePrefabManager.GetRandomObstacle();
+        //GameObject obstacleObject = Instantiate(obstaclePrefab);
+        //var obstacle = obstacleObject.GetComponent<Obstacle>();
+        //obstacle.roundabout = this;
+        //obstacle.CurrentLane = lane;
+        //obstacle.CurrentAngle = j * anglePerVehicle;
+        //obstacle.transform.position = GetPointOnLane(lane, obstacle.CurrentAngle);
+        //laneObjects[i].Add(obstacle);
+        //obstaclesSpawned += 1;
+    }
+
+    void SpawnPickup()
+    {
+        int lane = -1;
+        for (int i = 0; i < lanes; i++)
+        {
+            if (pickupsByLane[i].Count < maxPickupsPerLane &&
+                (lane < 0 || pickupsByLane[i].Count < pickupsByLane[lane].Count))
+            {
+                lane = i;
+            }
+        }
+
+        if (lane < 0) return;
+
+        var prefab = PickupManager.GetRandomPickup();
+        var pickupObject = Instantiate(prefab);
+        var pickup = pickupObject.GetComponent<Pickup>();
+
+        pickup.transform.position = GetPointOnLane(lane + 1, Random.Range(0.0f, 360.0f));
+        pickupsByLane[lane].Add(pickup);
+        pickup.OnPickedUp.AddListener(() => pickupsByLane[lane].Remove(pickup));
     }
 
     public float GetLaneRadius(float lane)
@@ -203,8 +236,17 @@ public class Roundabout : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!ready) return;
+
         for (int i = 0; i < lanes; i++)
             SortLane(i + 1);
+
+        untilPickup -= Time.deltaTime;
+        if(untilPickup <= 0.0f)
+        {
+            SpawnPickup();
+            untilPickup = Random.Range(minPickupTimer, maxPickupTimer);
+        }
     }
 
     private void OnDrawGizmosSelected()
