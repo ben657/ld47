@@ -51,6 +51,7 @@ public class Roundabout : MonoBehaviour
                     var obstaclePrefab = ObstaclePrefabManager.GetRandomObstacle();
                     GameObject obstacleObject = Instantiate(obstaclePrefab);
                     var obstacle = obstacleObject.GetComponent<Obstacle>();
+                    obstacle.roundabout = this;
                     obstacle.CurrentLane = lane;
                     obstacle.CurrentAngle = j * anglePerVehicle;
                     obstacle.transform.position = GetPointOnLane(lane, obstacle.CurrentAngle);
@@ -96,6 +97,17 @@ public class Roundabout : MonoBehaviour
         return diff / 360 * GetLaneCirc(lane);
     }
 
+    public float GetAngleDistance(int lane, Vector3 from, Vector3 to)
+    {
+        float fromAngle = Vector3.SignedAngle(Vector3.forward, from, Vector3.up);
+        if (fromAngle < 0.0f) fromAngle += 360.0f;
+        float toAngle = Vector3.SignedAngle(Vector3.forward, to, Vector3.up);
+        if (toAngle < 0.0f) toAngle += 360.0f;
+        float diff = toAngle - fromAngle;
+        if (diff < 0.0f) diff += 360.0f;
+        return diff / 360 * GetLaneCirc(lane);
+    }
+
     public float MoveAngleAroundLane(float lane, float current, float distance)
     {
         float circ = GetLaneCirc(lane);
@@ -136,6 +148,7 @@ public class Roundabout : MonoBehaviour
     {
         laneObjects[from - 1].Remove(vehicle);
         laneObjects[to - 1].Add(vehicle);
+        SortLane(from);
         SortLane(to);
     }
 
@@ -155,10 +168,43 @@ public class Roundabout : MonoBehaviour
         return vehicles[nextIndex];
     }
 
+    public ILaneUser GetNextAhead(int lane, ILaneUser from)
+    {
+        int laneId = lane - 1;
+        var vehicles = laneObjects[laneId];
+        if (vehicles.Count == 0) return null;
+        for(int i = 0; i < vehicles.Count; i++)
+        {
+            if (vehicles[i] == from) continue;
+            if(vehicles[i].CurrentAngle > from.CurrentAngle)
+            {
+                return vehicles[i];
+            }
+        }
+        return vehicles[0] == from ? null : vehicles[0];
+    }
+
+    public ILaneUser GetNextBehind(int lane, ILaneUser from)
+    {
+        int laneId = lane - 1;
+        var vehicles = laneObjects[laneId];
+        if (vehicles.Count == 0) return null;
+        for (int i = vehicles.Count - 1; i >= 0; i--)
+        {
+            if (vehicles[i] == from) continue;
+            if (vehicles[i].CurrentAngle < from.CurrentAngle)
+            {
+                return vehicles[i];
+            }
+        }
+        return vehicles[vehicles.Count - 1] == from ? null : vehicles[vehicles.Count - 1];
+    }
+
     // Update is called once per frame
     void Update()
     {
-        
+        for (int i = 0; i < lanes; i++)
+            SortLane(i + 1);
     }
 
     private void OnDrawGizmosSelected()

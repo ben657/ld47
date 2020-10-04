@@ -83,14 +83,20 @@ public class Vehicle : MonoBehaviour, ILaneUser
         return (transform.position - lastPosition) / Time.deltaTime;
     }
 
-    public Bounds GetBounds()
+    public Vector3 GetCenter()
     {
-        var result = new Bounds();
         var collider = bodyMesh.GetComponent<BoxCollider>();
-        result.center = bodyMesh.transform.TransformPoint(collider.center);
-        Vector3 size = bodyMesh.transform.TransformVector(collider.size);
-        result.size = size;
-        return result;
+        return bodyMesh.transform.TransformPoint(collider.center);
+    }
+
+    public Vector3 GetFront()
+    {
+        return GetCenter() + transform.forward * bodyMesh.GetComponent<VehicleModel>().length * 0.5f;
+    }
+
+    public Vector3 GetRear()
+    {
+        return GetCenter() - transform.forward * bodyMesh.GetComponent<VehicleModel>().length * 0.5f;
     }
 
     public void ChangeLaneLeft()
@@ -213,6 +219,14 @@ public class Vehicle : MonoBehaviour, ILaneUser
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, 0.25f);
+
+            Gizmos.color = Color.green;
+            Vector3 front = GetFront();
+            Vector3 rear = GetRear();
+            Gizmos.DrawWireSphere(rear, 0.25f);
+            Gizmos.DrawLine(front, rear);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(front, 0.25f);
         }
 #endif
     }

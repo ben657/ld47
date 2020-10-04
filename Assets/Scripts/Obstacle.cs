@@ -7,6 +7,8 @@ public class Obstacle : MonoBehaviour, ILaneUser
     public float CurrentAngle { get; set; }
     public int CurrentLane { get; set; }
 
+    public Roundabout roundabout;
+
     public int GetLane()
     {
         return CurrentLane;
@@ -17,15 +19,21 @@ public class Obstacle : MonoBehaviour, ILaneUser
         return 0.0f;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    Vector3 GetForward()
     {
-        
+        Vector3 nextPos = roundabout.GetPointOnLane(CurrentLane, CurrentAngle + 1.0f);
+        return (nextPos - transform.position).normalized;
     }
 
-    // Update is called once per frame
-    void Update()
+    public Vector3 GetFront()
     {
-        
+        var collider = GetComponent<SphereCollider>();
+        return transform.position + GetForward() * collider.radius;
+    }
+
+    public Vector3 GetRear()
+    {
+        var collider = GetComponent<SphereCollider>();
+        return transform.position - GetForward() * collider.radius;
     }
 }

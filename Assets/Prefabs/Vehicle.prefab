@@ -4955,14 +4955,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af91456268dfe24bb1fe5914a8452a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: 0
   explosionParticles: {fileID: 2081755283953020962}
   maxSpeed: 0
   acceleration: 10
-  braking: 30
+  braking: 40
   throttle: 0
   meshName: 
   laneChangeTime: 1
   laneChangeThreshold: 0
+  bodyMesh: {fileID: 0}
   targetSpeed: 0
 --- !u!1 &7315792927593519258
 GameObject:

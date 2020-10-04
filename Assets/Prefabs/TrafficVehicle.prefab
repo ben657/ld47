@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d046e0b7aa106464d91103d642d5ac57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followDistance: 11
-  arseDistance: 5
-  backoffSpeed: 2
+  followDistance: 5
+  arseDistance: 3
+  backoffSpeed: 5
   minFollowTime: 2
-  turnDelay: 2
+  turnDelay: 1
+  minMergeDist: 10
 --- !u!1001 &2589223060001449125
 PrefabInstance:
   m_ObjectHideFlags: 0

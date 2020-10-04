@@ -10,6 +10,7 @@ public class TrafficVehicleController : MonoBehaviour
     public float backoffSpeed = 0.0f;
     public float minFollowTime = 0.0f;
     public float turnDelay = 0.0f;
+    public float minMergeDist = 2.0f;
 
     Vehicle vehicle;
     float followStartTime = 0.0f;
@@ -34,7 +35,7 @@ public class TrafficVehicleController : MonoBehaviour
         ILaneUser nextObject = vehicle.Roundabout.GetNextAhead(vehicle);
         if(nextObject != null)
         {
-            float distance = vehicle.Roundabout.GetAngleDistance(vehicle.GetLane(), vehicle.CurrentAngle, nextObject.CurrentAngle);
+            float distance = vehicle.Roundabout.GetAngleDistance(vehicle.GetLane(), vehicle.GetFront(), nextObject.GetRear());
             if (distance < followDistance)
             {
                 vehicle.targetSpeed = distance < arseDistance ? nextObject.GetSpeed() - backoffSpeed : nextObject.GetSpeed();
@@ -56,36 +57,51 @@ public class TrafficVehicleController : MonoBehaviour
         {
             bool canChangeLeft = false;
             bool canChangeRight = false;
-
-            var bounds = vehicle.GetBounds();
+            
 
             if (vehicle.GetLane() < roundabout.lanes)
             {
-                var hits = Physics.OverlapBox(bounds.center - transform.right * roundabout.laneWidth, bounds.extents * 2.5f, vehicle.bodyMesh.transform.rotation, ~0, QueryTriggerInteraction.Collide);
                 canChangeLeft = true;
-                foreach (var collider in hits)
+
+                int targetLane = vehicle.GetLane() + 1;
+                ILaneUser ahead = roundabout.GetNextAhead(targetLane, vehicle);
+                ILaneUser behind = roundabout.GetNextBehind(targetLane, vehicle);
+                Vector3 offset = -transform.right * roundabout.laneWidth;
+
+                if (Vector3.Dot(transform.forward, ahead.GetRear() - vehicle.GetFront()) < 0.0f
+                    || Vector3.Dot(-transform.forward, behind.GetFront() - vehicle.GetRear()) < 0.0f) canChangeLeft = false;
+
+                if (canChangeLeft)
                 {
-                    var otherVehicle = collider.GetComponentInParent<Vehicle>();
-                    var obstacle = collider.GetComponentInParent<Obstacle>();
-                    if ((otherVehicle && otherVehicle.GetLane() == vehicle.GetLane() && otherVehicle != vehicle)
-                        || (obstacle && obstacle.GetLane() == vehicle.GetLane()))
+                    float frontDist2 = (ahead.GetRear() - (vehicle.GetFront() + offset)).sqrMagnitude;
+                    if (frontDist2 < minMergeDist * minMergeDist) canChangeLeft = false;
+                    if (canChangeLeft)
                     {
-                        canChangeLeft = false;
+                        float rearDist2 = ((vehicle.GetRear() + offset) - behind.GetFront()).sqrMagnitude;
+                        if (rearDist2 < minMergeDist * minMergeDist) canChangeLeft = false;
                     }
                 }
             }
             if(vehicle.GetLane() > 1)
             {
-                var hits = Physics.OverlapBox(bounds.center + transform.right * roundabout.laneWidth, bounds.extents * 2.5f, vehicle.bodyMesh.transform.rotation, ~0, QueryTriggerInteraction.Collide);
                 canChangeRight = true;
-                foreach (var collider in hits)
+
+                int targetLane = vehicle.GetLane() - 1;
+                ILaneUser ahead = roundabout.GetNextAhead(targetLane, vehicle);
+                ILaneUser behind = roundabout.GetNextBehind(targetLane, vehicle);
+
+                if (Vector3.Dot(transform.forward, ahead.GetRear() - vehicle.GetFront()) < 0.0f
+                    || Vector3.Dot(-transform.forward, behind.GetFront() - vehicle.GetRear()) < 0.0f) canChangeRight = false;
+
+                if (canChangeRight)
                 {
-                    var otherVehicle = collider.GetComponentInParent<Vehicle>();
-                    var obstacle = collider.GetComponentInParent<Obstacle>();
-                    if ((otherVehicle && otherVehicle.GetLane() == vehicle.GetLane() && otherVehicle != vehicle) 
-                        || (obstacle && obstacle.GetLane() == vehicle.GetLane()))
+                    Vector3 offset = transform.right * roundabout.laneWidth;
+                    float frontDist2 = (ahead.GetRear() - (vehicle.GetFront() + offset)).sqrMagnitude;
+                    if (frontDist2 < minMergeDist * minMergeDist) canChangeRight = false;
+                    if (canChangeLeft)
                     {
-                        canChangeRight = false;
+                        float rearDist2 = ((vehicle.GetRear() + offset) - behind.GetFront()).sqrMagnitude;
+                        if (rearDist2 < minMergeDist * minMergeDist) canChangeRight = false;
                     }
                 }
             }
@@ -107,16 +123,23 @@ public class TrafficVehicleController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (!vehicle) return;
-        var bounds = vehicle.GetBounds();
-        var roundabout = vehicle.Roundabout;
-        Gizmos.color = Color.green;
-        var prevMatrix = Gizmos.matrix;
-        Gizmos.matrix = vehicle.bodyMesh.transform.localToWorldMatrix;
-        Vector3 size = vehicle.bodyMesh.transform.InverseTransformVector(bounds.size) * 2.5f;
+        Gizmos.color = Color.red;
+        Vector3 offset = -transform.right * vehicle.Roundabout.laneWidth;
+        Vector3 r = (vehicle.GetRear() - transform.forward * minMergeDist + offset);
+        Vector3 f = (vehicle.GetFront() + transform.forward * minMergeDist + offset);
+        Gizmos.DrawWireSphere(r, 0.25f);
+        Gizmos.DrawWireSphere(f, 0.25f);
+        Gizmos.DrawLine(f, r);
 
-        Gizmos.DrawWireCube(vehicle.bodyMesh.transform.InverseTransformPoint(bounds.center + transform.right * roundabout.laneWidth), size);
-        Gizmos.DrawWireCube(vehicle.bodyMesh.transform.InverseTransformPoint(bounds.center - transform.right * roundabout.laneWidth), size);
-        Gizmos.matrix = prevMatrix;
+        offset *= -1.0f;
+        r = (vehicle.GetRear() - transform.forward * minMergeDist + offset);
+        f = (vehicle.GetFront() + transform.forward * minMergeDist + offset);
+        Gizmos.DrawWireSphere(r, 0.25f);
+        Gizmos.DrawWireSphere(f, 0.25f);
+        Gizmos.DrawLine(f, r);
+
+        ILaneUser infront = vehicle.Roundabout.GetNextAhead(vehicle.GetLane(), vehicle);
+        if(infront != null)
+            Gizmos.DrawWireSphere(((MonoBehaviour)infront).transform.position, 1.0f);
     }
 }

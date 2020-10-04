@@ -13,6 +13,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 97.675285, y: 39.12778, z: 30.000006}
   m_Center: {x: -24.726397, y: 19.56389, z: 0}
+--- !u!114 &5410970187991651292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 880078451360263221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d642f8efc7147945811e1f68cdb4e8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  length: 6.1
 --- !u!1001 &69739143575425380
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -106,7 +119,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: c4d61faf29f6bea45b5fea297641186e, type: 2}
     - target: {fileID: 919132149155446097, guid: da59c49f9eb974d4fa0851293c62c564, type: 3}
       propertyPath: m_Name
-      value: ShortLorry Variant
+      value: ShortLorry
       objectReference: {fileID: 0}
     - target: {fileID: 2997410895137593597, guid: da59c49f9eb974d4fa0851293c62c564, type: 3}
       propertyPath: m_Materials.Array.data[0]

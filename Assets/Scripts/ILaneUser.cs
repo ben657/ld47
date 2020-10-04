@@ -8,4 +8,7 @@ public interface ILaneUser
     int CurrentLane { get; set; }
     int GetLane();
     float GetSpeed();
+
+    Vector3 GetFront();
+    Vector3 GetRear();
 }
