@@ -69,6 +69,7 @@ MonoBehaviour:
     m_LabelNames:
     - default
     - VehicleModelPrefabs
+    - ObstaclePrefabs
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 4712af9f0cdf9ab4b89e781fde815c6e, type: 2}

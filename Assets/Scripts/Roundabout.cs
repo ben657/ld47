@@ -17,21 +17,21 @@ public class Roundabout : MonoBehaviour
 
     float maxRadius = 0.0f;
 
-    List<Vehicle>[] vehiclesByLane;
+    List<ILaneUser>[] laneObjects;
 
     void Awake()
     {
         maxRadius = centerRadius + laneWidth * lanes;
-        vehiclesByLane = new List<Vehicle>[lanes];
+        laneObjects = new List<ILaneUser>[lanes];
         for(int i = 0; i < lanes; i++)
         {
-            vehiclesByLane[i] = new List<Vehicle>();
+            laneObjects[i] = new List<ILaneUser>();
         }
     }
 
     public void Setup(Vehicle playerVehicle)
     {
-        vehiclesByLane[playerVehicle.GetLane() - 1].Add(playerVehicle);
+        laneObjects[playerVehicle.GetLane() - 1].Add(playerVehicle);
         playerVehicle.OnLaneChanged.AddListener(HandleLaneChange);
         playerVehicle.OnDestroyed.AddListener(HandleDestroyed);
 
@@ -49,7 +49,7 @@ public class Roundabout : MonoBehaviour
                 vehicle.SetAngle(j * anglePerVehicle);
                 vehicle.SetLane(lane);
                 vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
-                vehiclesByLane[i].Add(vehicle);
+                laneObjects[i].Add(vehicle);
                 vehicle.OnLaneChanged.AddListener(HandleLaneChange);
                 vehicle.OnDestroyed.AddListener(HandleDestroyed);
             }
@@ -113,25 +113,25 @@ public class Roundabout : MonoBehaviour
 
     void SortLane(int lane)
     {
-        vehiclesByLane[lane - 1].Sort((a, b) => a.CurrentAngle.CompareTo(b.CurrentAngle));
+        laneObjects[lane - 1].Sort((a, b) => a.CurrentAngle.CompareTo(b.CurrentAngle));
     }
 
     void HandleLaneChange(Vehicle vehicle, int from, int to)
     {
-        vehiclesByLane[from - 1].Remove(vehicle);
-        vehiclesByLane[to - 1].Add(vehicle);
+        laneObjects[from - 1].Remove(vehicle);
+        laneObjects[to - 1].Add(vehicle);
         SortLane(to);
     }
 
     void HandleDestroyed(Vehicle vehicle)
     {
-        vehiclesByLane[vehicle.GetLane() - 1].Remove(vehicle);
+        laneObjects[vehicle.GetLane() - 1].Remove(vehicle);
     }
 
-    public Vehicle GetVehicleAhead(Vehicle from)
+    public ILaneUser GetNextAhead(ILaneUser from)
     {
-        int laneId = from.GetLane() - 1;
-        var vehicles = vehiclesByLane[laneId];
+        int laneId = from.CurrentLane - 1;
+        var vehicles = laneObjects[laneId];
         int index = vehicles.FindIndex(v => v == from);
         int nextIndex = index + 1;
         if (nextIndex >= vehicles.Count) nextIndex = 0;

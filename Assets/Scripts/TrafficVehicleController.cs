@@ -30,13 +30,14 @@ public class TrafficVehicleController : MonoBehaviour
     {
         var roundabout = vehicle.Roundabout;
 
-        Vehicle nextVehicle = vehicle.Roundabout.GetVehicleAhead(vehicle);
-        if(nextVehicle != null)
+        // Follow the next object until we can go around them
+        ILaneUser nextObject = vehicle.Roundabout.GetNextAhead(vehicle);
+        if(nextObject != null)
         {
-            float distance = vehicle.Roundabout.GetAngleDistance(vehicle.GetLane(), vehicle.CurrentAngle, nextVehicle.CurrentAngle);
+            float distance = vehicle.Roundabout.GetAngleDistance(vehicle.GetLane(), vehicle.CurrentAngle, nextObject.CurrentAngle);
             if (distance < followDistance)
             {
-                vehicle.targetSpeed = distance < arseDistance ? nextVehicle.CurrentSpeed - backoffSpeed : nextVehicle.CurrentSpeed;
+                vehicle.targetSpeed = distance < arseDistance ? nextObject.GetSpeed() - backoffSpeed : nextObject.GetSpeed();
                 if (followStartTime == 0.0f) followStartTime = Time.time;
             }
             else if (distance > followDistance + 0.2f)
@@ -49,6 +50,7 @@ public class TrafficVehicleController : MonoBehaviour
             ResetFollowing();
         }
 
+        // If we've been following for a few seconds, try and go around the object
         if(vehicle.targetSpeed < vehicle.maxSpeed && Time.time - followStartTime > minFollowTime && Time.time - lastTurnTime > turnDelay)
         {
             bool canChangeLeft = false;

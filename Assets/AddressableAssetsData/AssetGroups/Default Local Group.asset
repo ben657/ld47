@@ -17,13 +17,34 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 8b16de08ee190544cbe714a04f5d70b7
   m_SerializeEntries:
+  - m_GUID: 1141adb1297f6eb44aa703d37bbbdc03
+    m_Address: Assets/Prefabs/Obstacles/Logs.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ObstaclePrefabs
+    m_MainAsset: {fileID: 5110414189906692851, guid: 1141adb1297f6eb44aa703d37bbbdc03, type: 3}
+    m_TargetAsset: {fileID: 5110414189906692851, guid: 1141adb1297f6eb44aa703d37bbbdc03, type: 3}
+  - m_GUID: 18777fefe82e8ba43a592328e777bec9
+    m_Address: Assets/Prefabs/Obstacles/Roadworks.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ObstaclePrefabs
+    m_MainAsset: {fileID: 8525100883616807058, guid: 18777fefe82e8ba43a592328e777bec9, type: 3}
+    m_TargetAsset: {fileID: 8525100883616807058, guid: 18777fefe82e8ba43a592328e777bec9, type: 3}
   - m_GUID: 5c4d01590dd454146a6101fe1b8ea038
     m_Address: Assets/Prefabs/VehicleModels
     m_ReadOnly: 0
     m_SerializedLabels:
     - VehicleModelPrefabs
-    m_MainAsset: {fileID: 102900000, guid: 5c4d01590dd454146a6101fe1b8ea038, type: 3}
-    m_TargetAsset: {fileID: 102900000, guid: 5c4d01590dd454146a6101fe1b8ea038, type: 3}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 7da6292feb66e7a42a5d017cec1c8a32
+    m_Address: Assets/Prefabs/Obstacles/Rocks.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ObstaclePrefabs
+    m_MainAsset: {fileID: 3143259853292336726, guid: 7da6292feb66e7a42a5d017cec1c8a32, type: 3}
+    m_TargetAsset: {fileID: 3143259853292336726, guid: 7da6292feb66e7a42a5d017cec1c8a32, type: 3}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 36fc4d43c866da647a3be7a6dccc098d, type: 2}
   m_SchemaSet:

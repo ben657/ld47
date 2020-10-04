@@ -256,7 +256,7 @@ MonoBehaviour:
   lanes: 5
   centerRadius: 5
   radiusSegmentRatio: 14.4
-  radiusTrafficRatio: 0.3
+  radiusTrafficRatio: 0.25
   initialTraffic: 10
 --- !u!1 &979710502
 GameObject:
@@ -372,7 +372,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -0.00024414062, y: 0.000061035156}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 578.3, y: 125.9}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1422224454
