@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3749c36296f069478d491036023a4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minSpeed: 1
+  minSpeed: 5
 --- !u!1001 &4275036903798489696
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30,7 +30,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: braking
-      value: 15
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
+      propertyPath: acceleration
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6685171567472021076, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: m_Name
