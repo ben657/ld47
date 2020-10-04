@@ -13,7 +13,7 @@ public class Roundabout : MonoBehaviour
     public float centerRadius = 1.0f;
     public float radiusSegmentRatio = 14.4f;
     public float radiusTrafficRatio = 0.4f;
-    public int initialTraffic = 0;
+    public float initialObstacles = 1;
 
     float maxRadius = 0.0f;
 
@@ -35,6 +35,8 @@ public class Roundabout : MonoBehaviour
         playerVehicle.OnLaneChanged.AddListener(HandleLaneChange);
         playerVehicle.OnDestroyed.AddListener(HandleDestroyed);
 
+        int obstaclesSpawned = 0;
+        int vehicleCount = 0;
         for(int i = 0; i < lanes; i++)
         {
             int lane = i + 1;
@@ -44,14 +46,28 @@ public class Roundabout : MonoBehaviour
             float anglePerVehicle = 360.0f / trafficCount;
             for(int j = (i == lanes - 1 ? 1 : 0); j < trafficCount; j++)
             {
-                var vehicle = Instantiate(trafficVehiclePrefab);
-                vehicle.SetupForRoundabout(this);
-                vehicle.SetAngle(j * anglePerVehicle);
-                vehicle.SetLane(lane);
-                vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
-                laneObjects[i].Add(vehicle);
-                vehicle.OnLaneChanged.AddListener(HandleLaneChange);
-                vehicle.OnDestroyed.AddListener(HandleDestroyed);
+                if(obstaclesSpawned < initialObstacles)
+                {
+                    var obstaclePrefab = ObstaclePrefabManager.GetRandomObstacle();
+                    GameObject obstacleObject = Instantiate(obstaclePrefab);
+                    var obstacle = obstacleObject.GetComponent<Obstacle>();
+                    obstacle.CurrentLane = lane;
+                    obstacle.CurrentAngle = j * anglePerVehicle;
+                    obstacle.transform.position = GetPointOnLane(lane, obstacle.CurrentAngle);
+                    laneObjects[i].Add(obstacle);
+                    obstaclesSpawned += 1;
+                } else
+                {
+                    var vehicle = Instantiate(trafficVehiclePrefab);
+                    vehicle.id = ++vehicleCount;
+                    vehicle.SetupForRoundabout(this);
+                    vehicle.SetAngle(j * anglePerVehicle);
+                    vehicle.SetLane(lane);
+                    vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
+                    laneObjects[i].Add(vehicle);
+                    vehicle.OnLaneChanged.AddListener(HandleLaneChange);
+                    vehicle.OnDestroyed.AddListener(HandleDestroyed);
+                }
             }
         }
 
@@ -130,7 +146,7 @@ public class Roundabout : MonoBehaviour
 
     public ILaneUser GetNextAhead(ILaneUser from)
     {
-        int laneId = from.CurrentLane - 1;
+        int laneId = from.GetLane() - 1;
         var vehicles = laneObjects[laneId];
         int index = vehicles.FindIndex(v => v == from);
         int nextIndex = index + 1;

@@ -10,6 +10,7 @@ public class LaneChangeEvent : UnityEvent<Vehicle, int, int> { }
 [RequireComponent(typeof(Rigidbody))]
 public class Vehicle : MonoBehaviour, ILaneUser
 {
+    public int id = 0;
     public ParticleSystem explosionParticles;
     public float maxSpeed = 0.0f;
     public float acceleration = 0.0f;
@@ -24,7 +25,7 @@ public class Vehicle : MonoBehaviour, ILaneUser
     public LaneChangeEvent OnLaneChanged = new LaneChangeEvent();
 
     Rigidbody body;
-    MeshRenderer bodyMesh;
+    public MeshRenderer bodyMesh;
 
     Roundabout roundabout;
     public Roundabout Roundabout => roundabout;
@@ -84,7 +85,12 @@ public class Vehicle : MonoBehaviour, ILaneUser
 
     public Bounds GetBounds()
     {
-        return bodyMesh.GetComponent<BoxCollider>().bounds;
+        var result = new Bounds();
+        var collider = bodyMesh.GetComponent<BoxCollider>();
+        result.center = bodyMesh.transform.TransformPoint(collider.center);
+        Vector3 size = bodyMesh.transform.TransformVector(collider.size);
+        result.size = size;
+        return result;
     }
 
     public void ChangeLaneLeft()
@@ -119,7 +125,7 @@ public class Vehicle : MonoBehaviour, ILaneUser
     public int GetLane()
     {
         if (!IsChangingLane) return CurrentLane;
-        else return laneChangeProgress > laneChangeThreshold ? targetLane : CurrentLane;
+        else return laneChangeProgress >= laneChangeThreshold ? targetLane : CurrentLane;
     }
 
     public float GetSpeed()
@@ -164,7 +170,7 @@ public class Vehicle : MonoBehaviour, ILaneUser
             }
         }
 
-        transform.forward = GetVelocity();
+        transform.forward = currentSpeed > 0.01f || IsChangingLane ? GetVelocity() : GetTangentToRoundabout();
 
         lastPosition = transform.position;
     }

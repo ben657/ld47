@@ -23,7 +23,8 @@ public class Level : MonoBehaviour
     IEnumerator Setup()
     {
         VehicleModelManager.Init();
-        yield return new WaitUntil(() => VehicleModelManager.loaded);
+        ObstaclePrefabManager.Init();
+        yield return new WaitUntil(() => VehicleModelManager.loaded && ObstaclePrefabManager.loaded);
 
         var playerVehicle = Instantiate(playerVehiclePrefab);
         playerVehicle.SetupForRoundabout(roundabout);

@@ -26,7 +26,7 @@ public class TrafficVehicleController : MonoBehaviour
         followStartTime = 0.0f;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         var roundabout = vehicle.Roundabout;
 
@@ -50,8 +50,9 @@ public class TrafficVehicleController : MonoBehaviour
             ResetFollowing();
         }
 
+        float targetFollowTime = nextObject != null && nextObject is Obstacle ? 0.0f : minFollowTime;
         // If we've been following for a few seconds, try and go around the object
-        if(vehicle.targetSpeed < vehicle.maxSpeed && Time.time - followStartTime > minFollowTime && Time.time - lastTurnTime > turnDelay)
+        if (vehicle.targetSpeed < vehicle.maxSpeed && Time.time - followStartTime >= targetFollowTime && Time.time - lastTurnTime > turnDelay)
         {
             bool canChangeLeft = false;
             bool canChangeRight = false;
@@ -60,17 +61,39 @@ public class TrafficVehicleController : MonoBehaviour
 
             if (vehicle.GetLane() < roundabout.lanes)
             {
-                canChangeLeft = !Physics.CheckBox(bounds.center - transform.right * roundabout.laneWidth, bounds.extents * 1.5f);
+                var hits = Physics.OverlapBox(bounds.center - transform.right * roundabout.laneWidth, bounds.extents * 2.5f, vehicle.bodyMesh.transform.rotation, ~0, QueryTriggerInteraction.Collide);
+                canChangeLeft = true;
+                foreach (var collider in hits)
+                {
+                    var otherVehicle = collider.GetComponentInParent<Vehicle>();
+                    var obstacle = collider.GetComponentInParent<Obstacle>();
+                    if ((otherVehicle && otherVehicle.GetLane() == vehicle.GetLane() && otherVehicle != vehicle)
+                        || (obstacle && obstacle.GetLane() == vehicle.GetLane()))
+                    {
+                        canChangeLeft = false;
+                    }
+                }
             }
             if(vehicle.GetLane() > 1)
             {
-                canChangeRight = !Physics.CheckBox(bounds.center + transform.right * roundabout.laneWidth, bounds.extents * 1.5f);
+                var hits = Physics.OverlapBox(bounds.center + transform.right * roundabout.laneWidth, bounds.extents * 2.5f, vehicle.bodyMesh.transform.rotation, ~0, QueryTriggerInteraction.Collide);
+                canChangeRight = true;
+                foreach (var collider in hits)
+                {
+                    var otherVehicle = collider.GetComponentInParent<Vehicle>();
+                    var obstacle = collider.GetComponentInParent<Obstacle>();
+                    if ((otherVehicle && otherVehicle.GetLane() == vehicle.GetLane() && otherVehicle != vehicle) 
+                        || (obstacle && obstacle.GetLane() == vehicle.GetLane()))
+                    {
+                        canChangeRight = false;
+                    }
+                }
             }
 
             if (canChangeLeft || canChangeRight) {
                 lastTurnTime = Time.time;
                 followStartTime = Time.time;
-            };
+            }
 
             if (canChangeLeft && !canChangeRight) vehicle.ChangeLaneLeft();
             else if (canChangeRight && !canChangeLeft) vehicle.ChangeLaneRight();
@@ -80,5 +103,20 @@ public class TrafficVehicleController : MonoBehaviour
                 else vehicle.ChangeLaneRight();
             }
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!vehicle) return;
+        var bounds = vehicle.GetBounds();
+        var roundabout = vehicle.Roundabout;
+        Gizmos.color = Color.green;
+        var prevMatrix = Gizmos.matrix;
+        Gizmos.matrix = vehicle.bodyMesh.transform.localToWorldMatrix;
+        Vector3 size = vehicle.bodyMesh.transform.InverseTransformVector(bounds.size) * 2.5f;
+
+        Gizmos.DrawWireCube(vehicle.bodyMesh.transform.InverseTransformPoint(bounds.center + transform.right * roundabout.laneWidth), size);
+        Gizmos.DrawWireCube(vehicle.bodyMesh.transform.InverseTransformPoint(bounds.center - transform.right * roundabout.laneWidth), size);
+        Gizmos.matrix = prevMatrix;
     }
 }
