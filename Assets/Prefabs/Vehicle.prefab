@@ -97,5 +97,5 @@ MonoBehaviour:
   throttle: 0
   meshName: 
   laneChangeTime: 1
-  followDistance: 6
+  laneChangeThreshold: 0.1
   targetSpeed: 0

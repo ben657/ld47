@@ -128,6 +128,7 @@ public class Roundabout : MonoBehaviour
         int index = vehicles.FindIndex(v => v == from);
         int nextIndex = index + 1;
         if (nextIndex >= vehicles.Count) nextIndex = 0;
+        if (vehicles[nextIndex] == from) return null;
         return vehicles[nextIndex];
     }
 

@@ -24,10 +24,6 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
-      propertyPath: acceleration
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: meshName
       value: Sports Variant
       objectReference: {fileID: 0}

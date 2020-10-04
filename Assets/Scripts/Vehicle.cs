@@ -16,7 +16,7 @@ public class Vehicle : MonoBehaviour
     public float throttle = 0.0f;
     public string meshName = null;
     public float laneChangeTime = 1.0f;
-    public float followDistance = 1.0f;
+    public float laneChangeThreshold = 0.2f;
 
     public VehicleEvent OnCollide = new VehicleEvent();
     public LaneChangeEvent OnLaneChanged = new LaneChangeEvent();
@@ -76,6 +76,11 @@ public class Vehicle : MonoBehaviour
         return (transform.position - lastPosition) / Time.deltaTime;
     }
 
+    public Bounds GetBounds()
+    {
+        return bodyMesh.GetComponent<BoxCollider>().bounds;
+    }
+
     public void ChangeLaneLeft()
     {
         if (IsChangingLane) return;
@@ -108,7 +113,7 @@ public class Vehicle : MonoBehaviour
     public int GetLane()
     {
         if (!IsChangingLane) return currentLane;
-        else return laneChangeProgress > 0.5f ? targetLane : currentLane;
+        else return laneChangeProgress > laneChangeThreshold ? targetLane : currentLane;
     }
 
     public void SetAngle(float angle)
@@ -132,9 +137,10 @@ public class Vehicle : MonoBehaviour
             // Lane changing lerp
             if (IsChangingLane)
             {
-                if (laneChangeProgress <= 0.5f && laneChangeProgress + laneChangeTime * Time.deltaTime > 0.5f)
+                float progressDelta = Time.deltaTime / laneChangeTime;
+                if (laneChangeProgress <= laneChangeThreshold && laneChangeProgress + progressDelta > laneChangeThreshold)
                     OnLaneChanged.Invoke(this, currentLane, targetLane);
-                laneChangeProgress += laneChangeTime * Time.deltaTime;
+                laneChangeProgress += progressDelta;
                 float laneLerpAmount = Mathf.SmoothStep(0.0f, 1.0f, laneChangeProgress);
                 transform.position = Vector3.Lerp(transform.position, roundabout.GetPointOnLane(targetLane, currentAngle), laneLerpAmount);
 

@@ -256,7 +256,7 @@ MonoBehaviour:
   lanes: 5
   centerRadius: 5
   radiusSegmentRatio: 14.4
-  radiusTrafficRatio: 0.4
+  radiusTrafficRatio: 0.3
   initialTraffic: 10
 --- !u!1 &979710502
 GameObject:

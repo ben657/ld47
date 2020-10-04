@@ -20,6 +20,7 @@ public class Level : MonoBehaviour
 
         var playerVehicle = Instantiate(playerVehiclePrefab);
         playerVehicle.SetupForRoundabout(roundabout);
+        playerVehicle.SetAngle(90);
 
         Camera.main.GetComponent<CameraController>().target = playerVehicle;
 

@@ -6,12 +6,24 @@ using UnityEngine;
 public class TrafficVehicleController : MonoBehaviour
 {
     public float followDistance = 0.0f;
+    public float arseDistance = 0.0f;
+    public float backoffSpeed = 0.0f;
+    public float minFollowTime = 0.0f;
+    public float turnDelay = 0.0f;
 
     Vehicle vehicle;
+    float followStartTime = 0.0f;
+    float lastTurnTime = 0.0f;
 
     private void Awake()
     {
         vehicle = GetComponent<Vehicle>();
+    }
+
+    void ResetFollowing()
+    {
+        vehicle.targetSpeed = vehicle.maxSpeed;
+        followStartTime = 0.0f;
     }
 
     private void Update()
@@ -19,29 +31,44 @@ public class TrafficVehicleController : MonoBehaviour
         var roundabout = vehicle.Roundabout;
 
         Vehicle nextVehicle = vehicle.Roundabout.GetVehicleAhead(vehicle);
-        float distance = vehicle.Roundabout.GetAngleDistance(vehicle.GetLane(), vehicle.CurrentAngle, nextVehicle.CurrentAngle);
-        if (distance < followDistance)
+        if(nextVehicle != null)
         {
-            vehicle.targetSpeed = nextVehicle.CurrentSpeed;
+            float distance = vehicle.Roundabout.GetAngleDistance(vehicle.GetLane(), vehicle.CurrentAngle, nextVehicle.CurrentAngle);
+            if (distance < followDistance)
+            {
+                vehicle.targetSpeed = distance < arseDistance ? nextVehicle.CurrentSpeed - backoffSpeed : nextVehicle.CurrentSpeed;
+                if (followStartTime == 0.0f) followStartTime = Time.time;
+            }
+            else if (distance > followDistance + 0.2f)
+            {
+                ResetFollowing();
+            }
         }
         else
         {
-            vehicle.targetSpeed = vehicle.maxSpeed;
+            ResetFollowing();
         }
 
-        if(vehicle.targetSpeed < vehicle.maxSpeed)
+        if(vehicle.targetSpeed < vehicle.maxSpeed && Time.time - followStartTime > minFollowTime && Time.time - lastTurnTime > turnDelay)
         {
             bool canChangeLeft = false;
             bool canChangeRight = false;
 
+            var bounds = vehicle.GetBounds();
+
             if (vehicle.GetLane() < roundabout.lanes)
             {
-                canChangeLeft = !Physics.Raycast(transform.position, -transform.right, roundabout.laneWidth);
+                canChangeLeft = !Physics.CheckBox(bounds.center - transform.right * roundabout.laneWidth, bounds.extents * 1.5f);
             }
             if(vehicle.GetLane() > 1)
             {
-                canChangeRight = !Physics.Raycast(transform.position, -transform.right, roundabout.laneWidth);
+                canChangeRight = !Physics.CheckBox(bounds.center + transform.right * roundabout.laneWidth, bounds.extents * 1.5f);
             }
+
+            if (canChangeLeft || canChangeRight) {
+                lastTurnTime = Time.time;
+                followStartTime = Time.time;
+            };
 
             if (canChangeLeft && !canChangeRight) vehicle.ChangeLaneLeft();
             else if (canChangeRight && !canChangeLeft) vehicle.ChangeLaneRight();
