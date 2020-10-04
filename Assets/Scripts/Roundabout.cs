@@ -33,6 +33,7 @@ public class Roundabout : MonoBehaviour
     {
         vehiclesByLane[playerVehicle.GetLane() - 1].Add(playerVehicle);
         playerVehicle.OnLaneChanged.AddListener(HandleLaneChange);
+        playerVehicle.OnDestroyed.AddListener(HandleDestroyed);
 
         for(int i = 0; i < lanes; i++)
         {
@@ -50,6 +51,7 @@ public class Roundabout : MonoBehaviour
                 vehicle.maxSpeed = Random.Range(10.0f, 20.0f);
                 vehiclesByLane[i].Add(vehicle);
                 vehicle.OnLaneChanged.AddListener(HandleLaneChange);
+                vehicle.OnDestroyed.AddListener(HandleDestroyed);
             }
         }
 
@@ -119,6 +121,11 @@ public class Roundabout : MonoBehaviour
         vehiclesByLane[from - 1].Remove(vehicle);
         vehiclesByLane[to - 1].Add(vehicle);
         SortLane(to);
+    }
+
+    void HandleDestroyed(Vehicle vehicle)
+    {
+        vehiclesByLane[vehicle.GetLane() - 1].Remove(vehicle);
     }
 
     public Vehicle GetVehicleAhead(Vehicle from)

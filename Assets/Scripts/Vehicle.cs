@@ -10,6 +10,7 @@ public class LaneChangeEvent : UnityEvent<Vehicle, int, int> { }
 [RequireComponent(typeof(Rigidbody))]
 public class Vehicle : MonoBehaviour
 {
+    public ParticleSystem explosionParticles;
     public float maxSpeed = 0.0f;
     public float acceleration = 0.0f;
     public float braking = 0.0f;
@@ -19,6 +20,7 @@ public class Vehicle : MonoBehaviour
     public float laneChangeThreshold = 0.2f;
 
     public VehicleEvent OnCollide = new VehicleEvent();
+    public VehicleEvent OnDestroyed = new VehicleEvent();
     public LaneChangeEvent OnLaneChanged = new LaneChangeEvent();
 
     Rigidbody body;
@@ -39,6 +41,8 @@ public class Vehicle : MonoBehaviour
     public float CurrentSpeed => currentSpeed;
     public float targetSpeed = 0.0f;
 
+    bool destroying = false;
+
     Vector3 lastPosition;
 
     private void Awake()
@@ -57,6 +61,8 @@ public class Vehicle : MonoBehaviour
         bodyMesh.material.color = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 1.0f);
 
         targetSpeed = maxSpeed;
+        transform.position = roundabout.GetPointOnLane(currentLane, currentAngle);
+        transform.forward = GetTangentToRoundabout();
     }
 
     public void SetupForRoundabout(Roundabout roundabout)
@@ -124,12 +130,16 @@ public class Vehicle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (destroying) return;
+
         if (roundabout)
         {
             throttle = currentSpeed == targetSpeed ? 0.0f : currentSpeed < targetSpeed ? 1.0f : -1.0f;
             float changeRate = throttle < 0.0f && currentSpeed > 0.0f ? braking : acceleration;
 
+            float lastSpeed = currentSpeed;
             currentSpeed = Mathf.Clamp(currentSpeed + throttle * changeRate * Time.deltaTime, -maxSpeed * 0.5f, maxSpeed);
+            if (lastSpeed > targetSpeed && currentSpeed < targetSpeed) currentSpeed = targetSpeed;
 
             currentAngle = roundabout.MoveAngleAroundLane(currentLane, currentAngle, currentSpeed * Time.deltaTime);
             transform.position = roundabout.GetPointOnLane(currentLane, currentAngle);
@@ -154,16 +164,33 @@ public class Vehicle : MonoBehaviour
         lastPosition = transform.position;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if(collision.collider.attachedRigidbody)
+        var vehicle = other.GetComponentInParent<Vehicle>();
+        if (vehicle)
         {
-            var vehicle = collision.collider.attachedRigidbody.GetComponent<Vehicle>();
-            if (vehicle)
-                OnCollide.Invoke(vehicle);
-
             Debug.Log("Collided");
+            OnCollide.Invoke(vehicle);
+
+            if(GetComponent<KeyboardVehicleController>() || vehicle.GetComponent<KeyboardVehicleController>())
+                StartDestroy();
         }
+    }
+
+    public void StartDestroy()
+    {
+        StartCoroutine(Explode());
+    }
+
+    IEnumerator Explode()
+    {
+        destroying = true;
+        bodyMesh.gameObject.SetActive(false);
+        explosionParticles.Play();
+
+        yield return new WaitUntil(() => explosionParticles.isStopped);
+        OnDestroyed.Invoke(this);
+        Destroy(gameObject);
     }
 
     private void OnDrawGizmos()
