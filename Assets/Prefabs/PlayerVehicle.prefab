@@ -21,7 +21,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: maxSpeed
-      value: 10
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 6685171567472021074, guid: 36c7f2d9ee4484742adac1e368687d60, type: 3}
       propertyPath: meshName
